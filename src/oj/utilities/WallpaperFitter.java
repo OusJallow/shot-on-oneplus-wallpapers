@@ -2,6 +2,7 @@ package oj.utilities;
 
 import oj.data.Model;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.opencv.core.*;
 import org.opencv.core.Point;
 import org.opencv.highgui.HighGui;
@@ -30,6 +31,7 @@ public class WallpaperFitter {
         Mat image = getLuampaSampleImage();
         HashMap info = getSampleInfo();
         drawInfoOnWallpaper(info, image);
+        //TODO: [Remove] For Debug purposes
 //        HighGui.imshow("Worded Image", image);
 //        HighGui.waitKey(1000);
     }
@@ -50,9 +52,7 @@ public class WallpaperFitter {
         if(!systemScreenSize.equals(imageSize))
         {
             //callCropFunction
-            //Pass System dimension and picture dimension
-
-
+            //Pass System dimension and picture dimensionil;m,.
             //get new dimensions assuming  dimension is 1600 (width) * 900 (height)
              int differenceWidth = Math.abs(systemScreenSize.width - imageSize.width) ;
             differenceWidth = differenceWidth/2;
@@ -72,11 +72,16 @@ public class WallpaperFitter {
         return image;
     }
 
-
-    private void drawInfoOnWallpaper(HashMap<String, String> info, Mat image)
+    /**
+     * Returns a new image with info written (hard  coded) on it
+     * @param info The information to show stored in a HashMap
+     * @param image The image to be written on
+     */
+    private Mat drawInfoOnWallpaper(@NotNull HashMap<String, String> info, @NotNull Mat image)
     {
+
         String nameOfImage =  info.get(Model.IMAGE_NAME);
-        String authorOfImage = info.get(Model.IMAGE_COUNTRY);
+        String authorOfImage = info.get(Model.IMAGE_AUTHOR);
         String dateOfCapture = info.get(Model.IMAGE_DATE_OF_CAPTURE);
         String countryOfImage = info.get(Model.IMAGE_COUNTRY);
 
@@ -85,62 +90,124 @@ public class WallpaperFitter {
 
         //Calculate position of text
         //put in lower right conner
-        //get 10% dist of image
+        float percentageOfX = (float)  2/100;
+        double positionX = percentageOfX * imageSize.width;
 
-        float divide10 = (float)  5/100;
-        double positionX = divide10 * imageSize.width;
+        float percentageOfY = (float) 90/100;
+        double positionY = percentageOfY * imageSize.height;
 
-        float divide90 = (float) 95/100;
-        double positionY = divide90 * imageSize.height;
-
-
-        //TODO: {NOTE] Not satisfactory, trying Java Graphics
-
-//        Imgproc.putText(image,
-//                nameOfImage,
-//                new Point(positionX, positionY), Imgproc.FONT_HERSHEY_PLAIN,
-//                3,
-//                new Scalar(255,255,255), 3);
-
-        //change image to bufferedImage
-        Graphics graphics ;
-        BufferedImage bufferedImage;
-        MatOfByte byteImage = new MatOfByte();
-        Imgcodecs.imencode(".jpg", image, byteImage);
-        byte[] arry = byteImage.toArray();
-
-        InputStream inputStream = new ByteArrayInputStream(arry);
-
+        //As OpenCV provides a very limited set of fonts,
+        //we will be using Java graphics class to write on the image.
         try {
-            //TODO: [Review]
-            bufferedImage = ImageIO.read(inputStream);
+            Graphics graphics ;
+            BufferedImage bufferedImage;
+            // To Change Mat image to bufferedImage so as to make it compatible with Java Graphics
+            bufferedImage = matToBufferedImage(image);
             graphics = bufferedImage.getGraphics();
-            graphics.setFont(new Font("Times New Roman", Font.BOLD, 50));
-            graphics.drawString("Test Here We Glo", (int) positionX, (int) positionY);
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1000);
-            ImageIO.write(bufferedImage, "jpg", byteArrayOutputStream);
-            int outputStreamSize = byteArrayOutputStream.size();
-            byte[] byteArrayOutput =    byteArrayOutputStream.toByteArray();
-            int lenghtOfByteArrayOutput = byteArrayOutput.length;
-            Mat drawnImage = new MatOfByte(byteArrayOutput);
-            drawnImage = Imgcodecs.imdecode(drawnImage, Imgcodecs.IMREAD_ANYCOLOR);
-            System.out.println("Image Size: " + drawnImage.size().width + " x " + drawnImage.size().height);
+
+            //Write Info on image
+            int DEFAULT_FONT_SIZE = 20;
+            String DEFAULT_FONT_NAME = "Sans Serif";
+            int DEFAULT_Y_OFFSET = DEFAULT_FONT_SIZE + 10;
+            int DEFAULT_FONT_STYLE = Font.PLAIN;
+
+            //TODO [CAUTION] Font file paths
+            //using custom fonts
+            Font aileronCustomFont = createFont("src/oj/res/fonts/aileron/Aileron-Light.otf");
+            Font aftaCustomFont = createFont( "src/oj/res/fonts/afta/AftaSansThin-Regular.otf");
+
+            Font nameOfImageFont = aileronCustomFont.deriveFont(Font.BOLD, 30);
+            Font defaultFont = aftaCustomFont.deriveFont(Font.BOLD, DEFAULT_FONT_SIZE);
+            Font countryOfImageFont = new Font(DEFAULT_FONT_NAME, Font.ITALIC, DEFAULT_FONT_SIZE);
+
+            graphics.setFont(nameOfImageFont);
+            graphics.drawString(nameOfImage, (int) positionX, (int) positionY);
+
+            graphics.setFont(defaultFont);
+            graphics.drawString(authorOfImage, (int) positionX, (int)positionY + DEFAULT_Y_OFFSET);
+            graphics.drawString(countryOfImage, (int) positionX, (int) positionY + DEFAULT_Y_OFFSET + DEFAULT_Y_OFFSET);
+
+            //Now convert Java bufferedImage to OpenCV Mat image. (Reverse input process)
+            Mat drawnImage;
+            drawnImage = bufferedImageToMat(bufferedImage);
+
+            //TODO: [DEBUG] Gui img show
+            System.out.println("Image Size: " + image.size().width + " x " + image.size().height);
             HighGui.imshow("New", drawnImage);
             HighGui.waitKey(1000);
 
-
+            return drawnImage;
         }
 
         catch (Exception ex)
         {
             ex.printStackTrace();
+            return null;
         }
+    }
 
+    /**
+     * Returns a bufferedImage version of  an OpenCV Mat image
+     * which is compatible with Java Graphics
+     * @param image Mat image to convert
+     * @returns A bufferedImage object or null
+     * if there is an error
+     */
+    @Nullable
+    private BufferedImage matToBufferedImage(@NotNull Mat image)
+    {
+        BufferedImage bufferedImage;
+        try {
+            // To Change Mat image to bufferedImage so as to make it compatible with Java Graphics
+            MatOfByte byteImage = new MatOfByte();
 
+            //1. Encode Mat image to MatOfByte to be able to get a byte[]
+            Imgcodecs.imencode(".jpg", image, byteImage);
+            byte[] byteImageArray = byteImage.toArray();
+            //Read byte[] image to ByteArrayInputStream
+            InputStream inputStream = new ByteArrayInputStream(byteImageArray);
+            //Read inputStream into bufferedImage. Apply Graphics methods
+            bufferedImage = ImageIO.read(inputStream);
+            return bufferedImage;
+        }
+        catch (Exception ex)
+        {
+            System.out.println(this.getClass().getSimpleName() +
+            " : Error - changing Mat image to BufferedImage ");
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Returns a Mat image version of a buffered image compatible
+     * with OpenCV
+     * @param bufferedImage Image to convert
+     * @returns A Mat image or null if there is a conversion error
+     */
+    @Nullable
+    private Mat bufferedImageToMat(@NotNull BufferedImage bufferedImage)
+    {
+        try
+        {
+            //Now convert Java bufferedImage to OpenCV Mat image. (Reverse input process)
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ImageIO.write(bufferedImage, "jpg", outputStream);
+            byte[] byteImageOutput =    outputStream.toByteArray();
+            Mat matImage = new MatOfByte(byteImageOutput);
+            matImage = Imgcodecs.imdecode(matImage, Imgcodecs.IMREAD_ANYCOLOR);
+            return matImage;
+
+        }
+        catch (Exception ex)
+        {
+            System.out.println(this.getClass().getSimpleName() + ": Error - converting bufferedImage to Mat image");
+            return null;
+        }
 
     }
 
-    public Dimension getSystemScreenSize()
+    private Dimension getSystemScreenSize()
     {
         return  Toolkit.getDefaultToolkit().getScreenSize();
     }
@@ -148,7 +215,7 @@ public class WallpaperFitter {
     private Mat getLuampaSampleImage()
     {
         String filePath = "D:\\Users\\Ous\\IdeaProjects\\ShotOnOnePlus Wallpapers\\" +
-                "src\\oj\\image_samples\\LuampaRealImage.jpg";
+                "src\\oj\\res\\image_samples\\LuampaRealImage.jpg";
         Mat image = Imgcodecs.imread(filePath);
         //HighGui.imshow("Sample Image", image);
         //HighGui.waitKey(10);
@@ -165,5 +232,21 @@ public class WallpaperFitter {
         hashMap.put(Model.IMAGE_COUNTRY, "Russia");
         hashMap.put(Model.IMAGE_DATE_OF_CAPTURE, "17/12");
         return hashMap;
+    }
+
+    @Nullable
+    private Font createFont(String file)
+    {
+        File actualFile = new File(file);
+        Font createdFont;
+        try{
+            createdFont = Font.createFont(Font.TRUETYPE_FONT, actualFile);
+            return createdFont;
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
     }
 }
