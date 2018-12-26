@@ -23,13 +23,13 @@ public class WallpaperFitter {
 
     public WallpaperFitter()
     {
-        testDrawInfoOnWallpaper();
     }
 
     private void testDrawInfoOnWallpaper()
     {
+        //TODO: [TEST]
         Mat image = getLuampaSampleImage();
-        HashMap info = getSampleInfo();
+        HashMap<String, String> info = getSampleInfo();
         drawInfoOnWallpaper(info, image);
         //TODO: [Remove] For Debug purposes
 //        HighGui.imshow("Worded Image", image);
@@ -45,20 +45,20 @@ public class WallpaperFitter {
         Dimension imageSize = new Dimension((int) size.width, (int) size.height);
         Dimension systemScreenSize = getSystemScreenSize();
 
-        // Debugging
-        systemScreenSize = new Dimension(1600, 900);
+//        //TODO: [DEBUG]
+//        systemScreenSize = new Dimension(1600, 900);
 
-        //if sizes not equal crop image ?
+        //TODO: [ERROR CASE] If imageSize < systemScreenSize
+        //if systemScreenSize not equal to imageSize crop image
         if(!systemScreenSize.equals(imageSize))
         {
-            //callCropFunction
-            //Pass System dimension and picture dimensionil;m,.
-            //get new dimensions assuming  dimension is 1600 (width) * 900 (height)
-             int differenceWidth = Math.abs(systemScreenSize.width - imageSize.width) ;
+            //Cropping image to systemSize
+            int differenceWidth = Math.abs(systemScreenSize.width - imageSize.width) ;
             differenceWidth = differenceWidth/2;
             int differenceHeight = Math.abs(systemScreenSize.height - imageSize.height);
             differenceHeight = differenceHeight/2;
-            Rect rect = new Rect(differenceWidth, differenceHeight, systemScreenSize.width, systemScreenSize.height);
+            Rect rect = new Rect(differenceWidth, differenceHeight, systemScreenSize.width,
+                    systemScreenSize.height);
             //Imgproc.rectangle(image, rect, new Scalar(218,14,14), 4);
             Mat croppedImage = new Mat(image, rect);
 
@@ -77,6 +77,7 @@ public class WallpaperFitter {
      * @param info The information to show stored in a HashMap
      * @param image The image to be written on
      */
+    @NotNull
     private Mat drawInfoOnWallpaper(@NotNull HashMap<String, String> info, @NotNull Mat image)
     {
 

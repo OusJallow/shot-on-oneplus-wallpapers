@@ -40,39 +40,61 @@ public class WallpaperPuller {
     private final String VALUE_CLASS_ATTRIBUTE = "card-item";
 
     private OkHttpClient pullerClient;
-
     private String dailyWallpaperUrl ;
-
-
-
-
     private String dailyWallpaperInfo;
 
 
     public WallpaperPuller() {
 
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-
         pullerClient = new OkHttpClient();
-
-
     }
 
     /**
-     * Pulls the daily wallpaper
+     * Pulls the daily wallpaper url and info
      */
-    public void pullWallpaper() {
+    public Mat pullWallpaper() {
 
         try {
-            getWallpaperAndInfoUrl();
-            Mat image = getRawWallpaperImage(getDailyWallpaperUrl());
-            getRawWallpaperInfo();
-            //showImage(image);
 
-        } catch (Exception ex) {
-            System.out.println(this.getClass().getSimpleName() + ": Error pulling wallpaper");
-            ex.printStackTrace();
+            if (getDailyWallpaperUrl() == null) {
+                getWallpaperAndInfoUrl();
+            }
+            String wallpaperUrl= getDailyWallpaperUrl();
+            Mat image = getRawWallpaperImage(wallpaperUrl);
+            return image;
         }
+
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public HashMap<String, String> pullWallpaperInfo()
+    {
+        try {
+            if(getDailyWallpaperInfo() == null)
+            {
+               getWallpaperAndInfoUrl();
+            }
+            HashMap<String, String> infoHashmap = getRawWallpaperInfo();
+            return infoHashmap;
+
+        }
+
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    private void testDownloadWallpaperAndInfo()
+    {
+//        Mat image = getRawWallpaperImage(getDailyWallpaperUrl());
+//        getRawWallpaperInfo();
+        //showImage(image);
     }
 
     /**
@@ -81,34 +103,28 @@ public class WallpaperPuller {
 
     private void getWallpaperAndInfoUrl() throws IOException, BadLocationException {
 
-        //Download website HTML document and parse as string
-        Request request;
-        request = new Request.Builder()
-                .url(HTTPS_PHOTOS_ONEPLUS_COM)
-                .build();
-        Response response = pullerClient.newCall(request).execute();
-        ResponseBody body = response.body();
-        String websiteBodyStr = body.string();
-        System.out.println(websiteBodyStr);
 
-        //Create HTML doc object and read website into it
-        StringReader stringReader = new StringReader(websiteBodyStr);
-        HTMLEditorKit htmlEditorKit = new HTMLEditorKit();
-        HTMLDocument htmlDocument = (HTMLDocument) htmlEditorKit.createDefaultDocument();
-        htmlEditorKit.read(stringReader, htmlDocument, 0);
+            //Download website HTML document and parse as string
+            Request request;
+            request = new Request.Builder()
+                    .url(HTTPS_PHOTOS_ONEPLUS_COM)
+                    .build();
+            Response response = pullerClient.newCall(request).execute();
+            ResponseBody body = response.body();
+            String websiteBodyStr = body.string();
 
-//        //Verify HTML document
-//        System.out.println("*************************************************");
-//        int length = htmlDocument.getLength() - 1;
-//        System.out.println(htmlDocument.getDefaultRootElement().getDocument().toString());
+            //Create HTML doc object and read website into it
+            StringReader stringReader = new StringReader(websiteBodyStr);
+            HTMLEditorKit htmlEditorKit = new HTMLEditorKit();
+            HTMLDocument htmlDocument = (HTMLDocument) htmlEditorKit.createDefaultDocument();
+            htmlEditorKit.read(stringReader, htmlDocument, 0);
 
-
-        //Get Image source url and info(name, photographer, date)
-        Element elementWithWallpaperDetails = htmlDocument.getElement(htmlDocument.getDefaultRootElement(),
-                HTML.Attribute.CLASS, VALUE_CLASS_ATTRIBUTE);
-        AttributeSet attributeSet = elementWithWallpaperDetails.getAttributes();
-        dailyWallpaperUrl = (String) attributeSet.getAttribute(ATTRIBUTE_WALLPAPER_URL);
-        dailyWallpaperInfo = (String) attributeSet.getAttribute(ATTRIBUTE_WALLPAPER_INFO);
+            //Get Image source url and info(name, photographer, date)
+            Element elementWithWallpaperDetails = htmlDocument.getElement(htmlDocument.getDefaultRootElement(),
+                    HTML.Attribute.CLASS, VALUE_CLASS_ATTRIBUTE);
+            AttributeSet attributeSet = elementWithWallpaperDetails.getAttributes();
+            dailyWallpaperUrl = (String) attributeSet.getAttribute(ATTRIBUTE_WALLPAPER_URL);
+            dailyWallpaperInfo = (String) attributeSet.getAttribute(ATTRIBUTE_WALLPAPER_INFO);
     }
 
 
@@ -141,6 +157,10 @@ public class WallpaperPuller {
         return image;
     }
 
+
+    /**
+     * Extracts image info from image description
+     */
     private HashMap<String, String> getRawWallpaperInfo() throws Exception
     {
         //Keywords
@@ -152,7 +172,7 @@ public class WallpaperPuller {
         if(wallpaperInfo == null)
             throw new  Exception(this.getClass().getSimpleName() +  ": No wallpaper info received");
 
-        //Structure of Info: [25/11 Pushkar Fair 2018 by Satyam Nain from India #OneDayOnePhoto#]
+        //Structure of raw Info: [25/11 Pushkar Fair 2018 by Satyam Nain from India #OneDayOnePhoto#]
         String[] infoArray = wallpaperInfo.split(SPACE_DELIMITER);
         int indexOfBy = 0;
         int indexOfFrom = 0 ;
@@ -178,7 +198,6 @@ public class WallpaperPuller {
         StringBuilder nameOfImage = new StringBuilder();
         StringBuilder authorOfImage = new StringBuilder() ;
         StringBuilder countryOfImage = new StringBuilder() ;
-
 
         for(int i = 0; i <= indexOfOneDay; i++)
         {
@@ -215,6 +234,7 @@ public class WallpaperPuller {
         return dailyWallpaperUrl;
     }
 
+
     @Nullable
     @Contract(pure = true)
     private String getDailyWallpaperInfo() {
@@ -224,8 +244,10 @@ public class WallpaperPuller {
         return dailyWallpaperInfo;
     }
 
+
     private void showImage(Mat image, int waitDelay)
     {
+        //TODO: [DEBUG]
         //HighGui.namedWindow("Image", HighGui.WINDOW_AUTOSIZE);
         HighGui.imshow("Image", image);
         HighGui.waitKey(waitDelay);
@@ -243,6 +265,3 @@ public class WallpaperPuller {
     }
 
 }
-
-/*TODO: 1.Get Image. 2.Use appropriate image manipulation library
- */

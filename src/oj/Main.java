@@ -8,6 +8,10 @@ import javafx.stage.Stage;
 import oj.utilities.WallpaperFitter;
 import oj.utilities.WallpaperPuller;
 import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.highgui.HighGui;
+
+import java.util.HashMap;
 
 public class Main extends Application {
 
@@ -23,11 +27,13 @@ public class Main extends Application {
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         //launch(args);
-//        WallpaperPuller wallpaperPuller = new WallpaperPuller();
-//        wallpaperPuller.pullWallpaper();
-        WallpaperFitter wallpaperFitter = new WallpaperFitter();
-
-
+        WallpaperPuller wallpaperPuller = new WallpaperPuller();
+        Mat image =wallpaperPuller.pullWallpaper();
+        HashMap<String, String> hashMap =   wallpaperPuller.pullWallpaperInfo();
+        String done = "str";
+        HighGui.namedWindow("Image", HighGui.WINDOW_AUTOSIZE);
+        HighGui.imshow("Image", image);
+        HighGui.waitKey();
     }
 }
 
