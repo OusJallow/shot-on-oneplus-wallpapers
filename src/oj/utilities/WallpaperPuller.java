@@ -90,6 +90,7 @@ public class WallpaperPuller {
         }
     }
 
+    //TODO: [TEST]
     private void testDownloadWallpaperAndInfo()
     {
 //        Mat image = getRawWallpaperImage(getDailyWallpaperUrl());

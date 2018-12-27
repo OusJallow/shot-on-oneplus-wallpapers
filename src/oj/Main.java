@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import oj.utilities.WallpaperFitter;
 import oj.utilities.WallpaperPuller;
+import oj.utilities.WallpaperSetter;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.highgui.HighGui;
@@ -27,13 +28,15 @@ public class Main extends Application {
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         //launch(args);
-        WallpaperPuller wallpaperPuller = new WallpaperPuller();
-        Mat image =wallpaperPuller.pullWallpaper();
-        HashMap<String, String> hashMap =   wallpaperPuller.pullWallpaperInfo();
-        String done = "str";
-        HighGui.namedWindow("Image", HighGui.WINDOW_AUTOSIZE);
-        HighGui.imshow("Image", image);
-        HighGui.waitKey();
+//        WallpaperPuller wallpaperPuller = new WallpaperPuller();
+//        Mat image =wallpaperPuller.pullWallpaper();
+//        HashMap<String, String> hashMap =   wallpaperPuller.pullWallpaperInfo();
+//        String done = "str";
+//        HighGui.namedWindow("Image", HighGui.WINDOW_AUTOSIZE);
+//        HighGui.imshow("Image", image);
+//        HighGui.waitKey();
+
+        WallpaperSetter wallpaperSetter = new WallpaperSetter();
     }
 }
 
