@@ -125,8 +125,10 @@ public class WallpaperFitter {
             graphics.drawString(nameOfImage, (int) positionX, (int) positionY);
 
             graphics.setFont(defaultFont);
-            graphics.drawString(authorOfImage, (int) positionX, (int)positionY + DEFAULT_Y_OFFSET);
-            graphics.drawString(countryOfImage, (int) positionX, (int) positionY + DEFAULT_Y_OFFSET + DEFAULT_Y_OFFSET);
+            graphics.drawString(authorOfImage,
+                    (int) positionX, (int)positionY + DEFAULT_Y_OFFSET);
+            graphics.drawString(countryOfImage,
+                    (int) positionX, (int) positionY + DEFAULT_Y_OFFSET + DEFAULT_Y_OFFSET);
 
             //Now convert Java bufferedImage to OpenCV Mat image. (Reverse input process)
             Mat drawnImage;
@@ -202,7 +204,8 @@ public class WallpaperFitter {
         }
         catch (Exception ex)
         {
-            System.out.println(this.getClass().getSimpleName() + ": Error - converting bufferedImage to Mat image");
+            System.out.println(this.getClass().getSimpleName()
+                    + ": Error - converting bufferedImage to Mat image");
             return null;
         }
 

@@ -1,28 +1,53 @@
 package oj.utilities;
 
-import com.sun.jna.Library;
-import com.sun.jna.Native;
-
+import com.sun.jna.*;
 import com.sun.jna.win32.StdCallLibrary;
-
 import com.sun.jna.win32.W32APITypeMapper;
+
+import oj.data.Model;
+import oj.data.WallpaperImage;
 import org.jetbrains.annotations.NotNull;
+import org.opencv.core.MatOfInt;
+import org.opencv.imgcodecs.Imgcodecs;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WallpaperSetter {
+import static com.sun.jna.platform.win32.WinRas.MAX_PATH;
 
+public class WallpaperSetter {
+    private int STRING_OFFSET = 0;
     public WallpaperSetter()
     {
-//        setWallpaper("D:\\Users\\Ous\\IdeaProjects\\ShotOnOnePlus Wallpapers\\src" +
-//                "\\oj\\res\\image_samples\\LuampaRealImage.jpg");
-        getWallpaper();
     }
 
-    public void setWallpaper(@NotNull String filePath)
+    //setWallpaper(Mat image)
+        public boolean setWallpaper(@NotNull WallpaperImage wallpaper)
+        {
+            //Verify wallpaper has image, if not return false
+            if(!wallpaper.hasImage())
+                return false;
+            //Store Image in App WorkSpace
+            String appWorkspace = Model.getPathAppWorkspace();
+            String fileName = wallpaper.getInfo(WallpaperImage.IMAGE_NAME);
+            String filePath = appWorkspace + File.separator + fileName;
+            MatOfInt imageQualityParameters = new MatOfInt(Imgcodecs.IMWRITE_JPEG_QUALITY, 100);
+            boolean success = Imgcodecs.imwrite(filePath, wallpaper.getImage(), imageQualityParameters);
+
+            if(success)
+            {
+                setWallpaper(filePath);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+    private void setWallpaper(@NotNull String filePath)
     {
         try {
             //Verify file path exists
@@ -30,17 +55,19 @@ public class WallpaperSetter {
             //if file doesn't exist
             if (!file.exists()) {
                 throw new FileNotFoundException(this.getClass().getSimpleName()
-                        + ": Error - Wallpaper file does not exist");
+                        + ": Error - oj.Wallpaper file does not exist");
             }
 
             filePath = file.getAbsolutePath();
-           boolean success =  NativeWallpaperSetter.INSTANCE.SystemParametersInfoA(
+            Pointer filePathPointer = new Memory(MAX_PATH);
+            filePathPointer.setString(STRING_OFFSET, filePath);
+
+            NativeWallpaperSetter.INSTANCE.SystemParametersInfoA(
                     NativeWallpaperSetter.SPI_SETDESKWALLPAPER,
                     NativeWallpaperSetter.SPIF_NONE,
-                    filePath,
+                    filePathPointer,
                     NativeWallpaperSetter.SPIF_SENDCHANGE
             );
-            System.out.println(success);
         }
 
         catch (FileNotFoundException ex)
@@ -49,24 +76,38 @@ public class WallpaperSetter {
         }
     }
 
-    public char[] getWallpaper()
+    public String getWallpaper()
     {
-        String retrievedPath = " ";
-        boolean success = NativeWallpaperSetter.INSTANCE.SystemParametersInfoA(
+        Pointer retrievedPath = new Memory(MAX_PATH);
+        NativeWallpaperSetter.INSTANCE.SystemParametersInfoA(
                 NativeWallpaperSetter.SPI_GETDESKWALLPAPER,
-                100,
+                NativeWallpaperSetter.SPIF_MAXSTRING,
+                retrievedPath,
+                NativeWallpaperSetter.SPIF_NOUPDATE
+        );
+        return retrievedPath.getString(STRING_OFFSET);
+    }
+
+    private void testGetWallpaper()
+    {
+        Map<String, Object> map = new HashMap();
+        Pointer retrievedPath = new Memory(MAX_PATH);
+        map.put(Library.OPTION_TYPE_MAPPER, W32APITypeMapper.DEFAULT);
+        NativeWallpaperSetter INSTANCE2 = Native.load("user32",
+                NativeWallpaperSetter.class);
+        INSTANCE2.SystemParametersInfoA(
+                NativeWallpaperSetter.SPI_GETDESKWALLPAPER,
+                NativeWallpaperSetter.SPIF_MAXSTRING,
                 retrievedPath,
                 NativeWallpaperSetter.SPIF_NOUPDATE
 
         );
+//        byte[] bytes = retrievedPath.toString().getBytes(Charset.forName("UTF-16"));
+//        String is = new String(bytes, Charset.forName("UTF-16"));
+//        SortedMap charSets = Charset.availableCharsets();W
+        String string = retrievedPath.getString(0);
 
-        //String val = String.valueOf(retrievedPath);
-        System.out.println(success + ": " + retrievedPath);
-        return null;
-    }
-
-    public void testGetWallpaper()
-    {
+        int l = 0;
 
     }
 
@@ -80,7 +121,7 @@ interface NativeWallpaperSetter extends StdCallLibrary {
 
     //uiParam Options
     int SPIF_NONE = 0x0000;
-    int SPIF_MAXSTRING = 0x012C;
+    int SPIF_MAXSTRING = MAX_PATH;
 
     //fWinIni Options
     final int SPIF_NOUPDATE = 0x0000;
@@ -89,8 +130,7 @@ interface NativeWallpaperSetter extends StdCallLibrary {
 
     //Load appropriate native library (dll)
     NativeWallpaperSetter INSTANCE = Native.load("user32",
-            NativeWallpaperSetter.class
-            );
+            NativeWallpaperSetter.class);
 
     //Definition of methods to use
 
@@ -128,37 +168,6 @@ interface NativeWallpaperSetter extends StdCallLibrary {
      * For more information refer to:
      * <a>https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-systemparametersinfoa</a>
      */
-    boolean SystemParametersInfoA(int uiAction, int uiParam, String pvParam, int fWinIni) ;
+    boolean SystemParametersInfoA(int uiAction, int uiParam, Pointer pvParam, int fWinIni) ;
 
 }
-/* @Params of SystemParametersInfoA()
-  UINT  uiAction, : A Win32 defined hex code that specifies action to perform. (See @Constants)
-  UINT  uiParam, : Depends on uiAction, if
-                    + SPI_SETDESKWALLPAPER: uiParam is size of String
-                    + SPI_GETDESKWALLPAPER: uiParam is 0
-  PVOID pvParam, :  String path of file (Absolute Path)
-  UINT  fWinIni : Param to update user profile of change and notify system of change,
-                    + SPIF_UPDATEINIFILE: Only update user profile
-                    + SPIF_SENDCHANGE: Update user profile and notify system of change
-
-
-  Note: Java data types are mapped to Native data types
- */
-
-/* @Constants
-uiAction :
-  - SPI_SETDESKWALLPAPER = 0x0014
-  - SPI_GETDESKWALLPAPER = 0x0073
-
- uiParam:
-  - if uiAction = SPI_SETDESKWALLPAPER: None (0)
-  - else if uiAction = SPI_GETDESKWALLPAPER: Size of uiParam dataType
-
- pvParam: String path to wallpaper file
-
- fWinIni:
-  - SPIF_UPDATEINIFILE = 0x0001
-  - SPIF_SENDCHANGE = 0x0002
-
-
- */

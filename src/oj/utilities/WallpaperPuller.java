@@ -6,13 +6,10 @@ import okhttp3.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
-import org.opencv.core.MatOfInt;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -23,8 +20,9 @@ import javax.swing.text.html.HTMLEditorKit;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
-import java.util.Map;
 
+
+import oj.data.WallpaperImage;
 import static javax.imageio.ImageIO.read;
 
 /**
@@ -33,16 +31,9 @@ import static javax.imageio.ImageIO.read;
  */
 public class WallpaperPuller {
 
-
-    private final String HTTPS_PHOTOS_ONEPLUS_COM = Model.HTTPS_PHOTOS_ONEPLUS_COM;
-    private final String ATTRIBUTE_WALLPAPER_URL = "data-pic";
-    private final String ATTRIBUTE_WALLPAPER_INFO = "data-title";
-    private final String VALUE_CLASS_ATTRIBUTE = "card-item";
-
     private OkHttpClient pullerClient;
     private String dailyWallpaperUrl ;
     private String dailyWallpaperInfo;
-
 
     public WallpaperPuller() {
 
@@ -52,12 +43,42 @@ public class WallpaperPuller {
     /**
      * Pulls the daily wallpaper url and info
      */
-    public Mat pullWallpaper() {
+    @Nullable
+    public WallpaperImage pullWallpaper()
+    {
+        try{
+            if(getDailyWallpaperUrl() == null)
+            {
+                downloadWallpaperData();
+            }
+
+            WallpaperImage wallpaper = new WallpaperImage();
+            String wallpaperImageUrl = getDailyWallpaperUrl();
+            Mat image = getRawWallpaperImage(wallpaperImageUrl);
+            HashMap<String, String> info = getRawWallpaperInfo();
+
+            wallpaper.setImage(image);
+            wallpaper.setInfo(info);
+            return wallpaper;
+
+        }
+
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
+
+    }
+
+    /* Pull oj.Wallpaper old methods
+    TODO: [Review]
+    public Mat pullWallpaperF() {
 
         try {
 
             if (getDailyWallpaperUrl() == null) {
-                getWallpaperAndInfoUrl();
+                downloadWallpaperData();
             }
             String wallpaperUrl= getDailyWallpaperUrl();
             Mat image = getRawWallpaperImage(wallpaperUrl);
@@ -76,7 +97,7 @@ public class WallpaperPuller {
         try {
             if(getDailyWallpaperInfo() == null)
             {
-               getWallpaperAndInfoUrl();
+               downloadWallpaperData();
             }
             HashMap<String, String> infoHashmap = getRawWallpaperInfo();
             return infoHashmap;
@@ -88,7 +109,7 @@ public class WallpaperPuller {
             ex.printStackTrace();
             return null;
         }
-    }
+    }*/
 
     //TODO: [TEST]
     private void testDownloadWallpaperAndInfo()
@@ -99,38 +120,44 @@ public class WallpaperPuller {
     }
 
     /**
-     * Gets wallpaper URL and Wallpaper Info from #ShotOnOnePlus website
+     * Gets wallpaper URL and oj.Wallpaper Info from #ShotOnOnePlus website
      */
 
-    private void getWallpaperAndInfoUrl() throws IOException, BadLocationException {
+    private void downloadWallpaperData() throws IOException, BadLocationException {
 
 
-            //Download website HTML document and parse as string
-            Request request;
-            request = new Request.Builder()
+        //Download website HTML document and parse as string
+        Request request;
+        String HTTPS_PHOTOS_ONEPLUS_COM = Model.HTTPS_PHOTOS_ONEPLUS_COM;
+        String ATTRIBUTE_WALLPAPER_INFO = "data-title";
+        String ATTRIBUTE_WALLPAPER_URL = "data-pic";
+        String VALUE_CLASS_ATTRIBUTE = "card-item";
+
+        request = new Request.Builder()
                     .url(HTTPS_PHOTOS_ONEPLUS_COM)
                     .build();
-            Response response = pullerClient.newCall(request).execute();
-            ResponseBody body = response.body();
-            String websiteBodyStr = body.string();
+        Response response = pullerClient.newCall(request).execute();
+        ResponseBody body = response.body();
+        String websiteBodyStr = body.string();
 
-            //Create HTML doc object and read website into it
-            StringReader stringReader = new StringReader(websiteBodyStr);
-            HTMLEditorKit htmlEditorKit = new HTMLEditorKit();
-            HTMLDocument htmlDocument = (HTMLDocument) htmlEditorKit.createDefaultDocument();
-            htmlEditorKit.read(stringReader, htmlDocument, 0);
-
-            //Get Image source url and info(name, photographer, date)
-            Element elementWithWallpaperDetails = htmlDocument.getElement(htmlDocument.getDefaultRootElement(),
+        //Create HTML doc object and read website into it
+        StringReader stringReader = new StringReader(websiteBodyStr);
+        HTMLEditorKit htmlEditorKit = new HTMLEditorKit();
+        HTMLDocument htmlDocument = (HTMLDocument) htmlEditorKit.createDefaultDocument();
+        htmlEditorKit.read(stringReader, htmlDocument, 0);
+        System.out.println(websiteBodyStr);
+        //Get Image source url and info(name, photographer, date)
+        Element elementWithWallpaperDetails = htmlDocument.getElement(htmlDocument.getDefaultRootElement(),
                     HTML.Attribute.CLASS, VALUE_CLASS_ATTRIBUTE);
-            AttributeSet attributeSet = elementWithWallpaperDetails.getAttributes();
-            dailyWallpaperUrl = (String) attributeSet.getAttribute(ATTRIBUTE_WALLPAPER_URL);
-            dailyWallpaperInfo = (String) attributeSet.getAttribute(ATTRIBUTE_WALLPAPER_INFO);
+        AttributeSet attributeSet = elementWithWallpaperDetails.getAttributes();
+
+        dailyWallpaperUrl = (String) attributeSet.getAttribute(ATTRIBUTE_WALLPAPER_URL);
+        dailyWallpaperInfo = (String) attributeSet.getAttribute(ATTRIBUTE_WALLPAPER_INFO);
     }
 
 
     /**
-     * Downloads Wallpaper Image
+     * Downloads oj.Wallpaper Image
      * @param url URL of image
      * @return image - An OpenCV Image matrix or null if retrieval fails
      * @throws Exception Indicates error
@@ -262,7 +289,8 @@ public class WallpaperPuller {
 //        if(write)
 //        System.out.println("Image saved");
         showImage(image, 10);
-
     }
+
+
 
 }
