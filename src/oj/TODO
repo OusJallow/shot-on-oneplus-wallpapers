@@ -1,2 +1,12 @@
-1. Append Image Data (as JSON maybe) to Wallpaper before saving.
+1. Thread heavy tasks
+    * Image and Website retrieval
+    * Fitter
+    * Setter
+
+2. Add Metadata to images for future purposes (see TODO 2)
+ using Adobe Commons Imaging
+
+3. Append Image Data (as JSON maybe) to Wallpaper before saving.
    So it can be retrieved and reused for wallpaper slideshow  and etc
+
+

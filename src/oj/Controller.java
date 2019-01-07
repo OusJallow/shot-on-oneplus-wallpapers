@@ -17,7 +17,6 @@ public class Controller {
     public Button pullWallpaperButton;
     public Controller()
     {
-        tests();
     }
 
     public void pullAndSetWallpaper()
