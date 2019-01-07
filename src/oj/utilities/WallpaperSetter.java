@@ -6,6 +6,7 @@ import com.sun.jna.win32.W32APITypeMapper;
 
 import oj.data.Model;
 import oj.data.WallpaperImage;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.opencv.core.MatOfInt;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -26,12 +27,14 @@ public class WallpaperSetter {
     //setWallpaper(Mat image)
         public boolean setWallpaper(@NotNull WallpaperImage wallpaper)
         {
+            final String FILE_EXTENSION = ".jpg";
             //Verify wallpaper has image, if not return false
             if(!wallpaper.hasImage())
                 return false;
             //Store Image in App WorkSpace
-            String appWorkspace = Model.getPathAppWorkspace();
-            String fileName = wallpaper.getInfo(WallpaperImage.IMAGE_NAME);
+            String appWorkspace = Model.getPathAppWorkspace() ;
+            String fileName = wallpaper.getInfo(WallpaperImage.IMAGE_NAME) + FILE_EXTENSION;
+            fileName = RandomStringUtils.randomAlphanumeric(7) + FILE_EXTENSION;
             String filePath = appWorkspace + File.separator + fileName;
             MatOfInt imageQualityParameters = new MatOfInt(Imgcodecs.IMWRITE_JPEG_QUALITY, 100);
             boolean success = Imgcodecs.imwrite(filePath, wallpaper.getImage(), imageQualityParameters);
@@ -72,6 +75,7 @@ public class WallpaperSetter {
 
         catch (FileNotFoundException ex)
         {
+            System.out.println(ex.getMessage());
             System.out.println("Error: File does not exist");
         }
     }

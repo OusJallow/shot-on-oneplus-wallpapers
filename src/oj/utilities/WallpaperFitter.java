@@ -1,13 +1,12 @@
 package oj.utilities;
 
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import oj.data.Model;
+import oj.data.WallpaperImage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.opencv.core.*;
-import org.opencv.core.Point;
-import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -17,7 +16,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Map;
 
 public class WallpaperFitter {
 
@@ -28,8 +26,8 @@ public class WallpaperFitter {
     private void testDrawInfoOnWallpaper()
     {
         //TODO: [TEST]
-        Mat image = getLuampaSampleImage();
-        HashMap<String, String> info = getSampleInfo();
+        Mat image = Model.getLuampaSampleImage();
+        HashMap<String, String> info = Model.getSampleInfo();
         drawInfoOnWallpaper(info, image);
         //TODO: [Remove] For Debug purposes
 //        HighGui.imshow("Worded Image", image);
@@ -72,13 +70,18 @@ public class WallpaperFitter {
         return image;
     }
 
+    public Mat drawInfoOnWallpaper(WallpaperImage wallpaper)
+    {
+        return  drawInfoOnWallpaper(wallpaper.getAllInfo(), wallpaper.getImage());
+    }
+
     /**
      * Returns a new image with info written (hard  coded) on it
      * @param info The information to show stored in a HashMap
      * @param image The image to be written on
      */
     @NotNull
-    private Mat drawInfoOnWallpaper(@NotNull HashMap<String, String> info, @NotNull Mat image)
+    public Mat drawInfoOnWallpaper(@NotNull HashMap<String, String> info, @NotNull Mat image)
     {
 
         String nameOfImage =  info.get(Model.IMAGE_NAME);
@@ -94,7 +97,7 @@ public class WallpaperFitter {
         float percentageOfX = (float)  2/100;
         double positionX = percentageOfX * imageSize.width;
 
-        float percentageOfY = (float) 90/100;
+        float percentageOfY = (float) 88/100;
         double positionY = percentageOfY * imageSize.height;
 
         //As OpenCV provides a very limited set of fonts,
@@ -114,12 +117,25 @@ public class WallpaperFitter {
 
             //TODO [CAUTION] Font file paths
             //using custom fonts
+            Font iNgaan = createFont(Model.FONT_PATH_CJK);
             Font aileronCustomFont = createFont("src/oj/res/fonts/aileron/Aileron-Light.otf");
             Font aftaCustomFont = createFont( "src/oj/res/fonts/afta/AftaSansThin-Regular.otf");
 
-            Font nameOfImageFont = aileronCustomFont.deriveFont(Font.BOLD, 30);
-            Font defaultFont = aftaCustomFont.deriveFont(Font.BOLD, DEFAULT_FONT_SIZE);
-            Font countryOfImageFont = new Font(DEFAULT_FONT_NAME, Font.ITALIC, DEFAULT_FONT_SIZE);
+            Font nameOfImageFont;
+            Font defaultFont;
+
+            if(isCjkCountry(countryOfImage))
+            {
+                nameOfImageFont = iNgaan.deriveFont(Font.BOLD, 30);
+                defaultFont = iNgaan.deriveFont(Font.PLAIN, DEFAULT_FONT_SIZE);
+                //DEFAULT_Y_OFFSET = DEFAULT_Y_OFFSET + 3;
+            }
+            else
+            {
+                 nameOfImageFont = aileronCustomFont.deriveFont(Font.BOLD, 30);
+                 defaultFont = aftaCustomFont.deriveFont(Font.BOLD, DEFAULT_FONT_SIZE);
+
+            }
 
             graphics.setFont(nameOfImageFont);
             graphics.drawString(nameOfImage, (int) positionX, (int) positionY);
@@ -136,8 +152,8 @@ public class WallpaperFitter {
 
             //TODO: [DEBUG] Gui img show
             System.out.println("Image Size: " + image.size().width + " x " + image.size().height);
-            HighGui.imshow("New", drawnImage);
-            HighGui.waitKey(1000);
+//            HighGui.imshow("New", drawnImage);
+//            HighGui.waitKey(1000);
 
             return drawnImage;
         }
@@ -216,28 +232,6 @@ public class WallpaperFitter {
         return  Toolkit.getDefaultToolkit().getScreenSize();
     }
 
-    private Mat getLuampaSampleImage()
-    {
-        String filePath = "D:\\Users\\Ous\\IdeaProjects\\ShotOnOnePlus Wallpapers\\" +
-                "src\\oj\\res\\image_samples\\LuampaRealImage.jpg";
-        Mat image = Imgcodecs.imread(filePath);
-        //HighGui.imshow("Sample Image", image);
-        //HighGui.waitKey(10);
-        return image;
-    }
-
-    private HashMap<String, String> getSampleInfo()
-    {
-
-        //17/12 Lahemaa National Park viru raba by Dmitriy Lapkin from Russia #OneDayOnePhoto#
-        HashMap<String, String> hashMap = new HashMap<String, String>();
-        hashMap.put(Model.IMAGE_NAME, "Lahemaa National Park viru raba" );
-        hashMap.put(Model.IMAGE_AUTHOR, "Dmitriy Lapkin");
-        hashMap.put(Model.IMAGE_COUNTRY, "Russia");
-        hashMap.put(Model.IMAGE_DATE_OF_CAPTURE, "17/12");
-        return hashMap;
-    }
-
     @Nullable
     private Font createFont(String file)
     {
@@ -252,5 +246,19 @@ public class WallpaperFitter {
             ex.printStackTrace();
             return null;
         }
+    }
+
+    private boolean isCjkCountry(@NotNull String country)
+    {
+        //Chinese, Japan and Korean need special fonts
+        String[] cjkCountries = Model.CJK_COUNTRIES;
+        for(String cjkCountry: cjkCountries)
+        {
+            if(country.contains(cjkCountry))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

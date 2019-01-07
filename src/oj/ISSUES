@@ -1,0 +1,5 @@
+ISSUES
+
+1. [FIXED] WallpaperFitter.drawString() does not draw non ascii strings
+   A Font problem? Aileron writes gibberish
+   Afta doesnt even work

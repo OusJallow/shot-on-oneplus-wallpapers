@@ -18,6 +18,11 @@ public  class WallpaperImage
         return info.get(infoKey);
     }
 
+    public HashMap<String, String> getAllInfo()
+    {
+        return info;
+    }
+
     public void setInfo(HashMap<String, String> info) {
         this.info = info;
     }
