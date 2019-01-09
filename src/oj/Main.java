@@ -16,7 +16,6 @@ public class Main extends Application {
         primaryStage.setTitle("Shot On OnePlus Wallpapers");
         Scene scene = new Scene(root, 300, 275);
 
-
         primaryStage.getIcons().add(Model.getApplicationIcon());
         primaryStage.setScene(scene);
         primaryStage.show();

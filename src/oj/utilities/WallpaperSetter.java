@@ -69,7 +69,7 @@ public class WallpaperSetter {
                     NativeWallpaperSetter.SPI_SETDESKWALLPAPER,
                     NativeWallpaperSetter.SPIF_NONE,
                     filePathPointer,
-                    NativeWallpaperSetter.SPIF_SENDCHANGE
+                    NativeWallpaperSetter.SPIF_UPDATEINIFILE
             );
         }
 
@@ -92,6 +92,7 @@ public class WallpaperSetter {
         return retrievedPath.getString(STRING_OFFSET);
     }
 
+    //TODO [TEST]
     private void testGetWallpaper()
     {
         Map<String, Object> map = new HashMap();
