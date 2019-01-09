@@ -31,14 +31,19 @@ public class Wallpaper  {
 
     public void pullAndSetWallpaperUnthreaded() //thread
     {
+        uiController.setStatusBarMessage("Downloading Wallpaper...");
         WallpaperImage wallpaper = wallpaperPuller.pullWallpaper();
         if(!wallpaper.hasImage())
             return;
+        uiController.setStatusBarMessage("Fitting Wallpaper...");
         Mat image = wallpaperFitter.fitWallpaperToScreen(wallpaper.getImage());
         wallpaper.setImage(image);
+        uiController.setStatusBarMessage("Adding Info to Wallpaper...");
         image = wallpaperFitter.drawInfoOnWallpaper(wallpaper);
         wallpaper.setImage(image);
+        uiController.setStatusBarMessage("Setting Wallpaper...");
         wallpaperSetter.setWallpaper(wallpaper);
+        uiController.clearStatusBar();
     }
 
     public void pullAndSetWallpaper()

@@ -1,18 +1,18 @@
 package oj;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 
-import java.lang.reflect.Method;
-
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import oj.data.Model;
 import oj.data.WallpaperImage;
-//import org.controlsfx.control.StatusBar;
+import oj.events.ChangeStatusEvent;
+import oj.events.ChangeStatusHandler;
+import oj.utilities.StatusBarCustom;
 
 public class Controller {
 
@@ -21,15 +21,17 @@ public class Controller {
 
     @FXML private Button pullWallpaperButton;
     @FXML private ProgressIndicator loadingWallpaperIndicator = new ProgressIndicator();
- //   @FXML private StatusBar statusBar;
+    @FXML private StatusBarCustom statusBar;
 
 
     Scene uiScene ;
-    GridPane gridPaneRoot;
+    BorderPane booderPane;
 
     public Controller()
     {
-
+        Platform.runLater(() -> {
+            initControls();
+        });
     }
 
     public void pullAndSetWallpaper()
@@ -50,34 +52,39 @@ public class Controller {
         pullWallpaperButton.setVisible(true);
     }
 
-    private void initControls()
-    {
-        uiScene = pullWallpaperButton.getScene();
-        gridPaneRoot = (GridPane) uiScene.getRoot();
-        loadingWallpaperIndicator.setProgress(-1);
+    public void setStatusBarMessage(String message) {
+        //  statusBar.setText(message);
+        statusBar.addSetChangeStatusListener(statusHandler);
+        Platform.runLater(()->{
+            this.statusBar.fireEvent(new ChangeStatusEvent(message));
+        });
+
     }
 
 
 
+    public void clearStatusBar()
+    {
+        Platform.runLater(()->{
+            statusBar.fireEvent(new ChangeStatusEvent(" "));
+        });
+    }
 
-   
+    private void initControls()
+    {
+        uiScene = pullWallpaperButton.getScene();
+        booderPane = (BorderPane) uiScene.getRoot();
+        loadingWallpaperIndicator.setProgress(-1);
+    }
 
+    private ChangeStatusHandler statusHandler = new ChangeStatusHandler() {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        @Override
+        public void handle(ChangeStatusEvent event) {
+            String message = event.getMessage();
+            statusBar.setText(message);
+        }
+    };
 
 
 
@@ -122,3 +129,6 @@ public class Controller {
 
 
 }
+
+
+
