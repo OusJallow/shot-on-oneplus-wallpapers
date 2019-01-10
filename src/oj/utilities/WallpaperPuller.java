@@ -36,7 +36,7 @@ public class WallpaperPuller {
     private String dailyWallpaperInfo;
 
     public WallpaperPuller() {
-
+      //  LoadOpenCVLibrary.loadOpenCV();
         pullerClient = new OkHttpClient();
     }
 

@@ -1,7 +1,11 @@
-1. Thread heavy tasks
+1. [DONE] Thread heavy tasks
     * Image and Website retrieval
     * Fitter
     * Setter
+
+4. Add tests with JUnit
+
+5. Wrap in an installer
 
 2. Add Metadata to images for future purposes (see TODO 2)
  using Adobe Commons Imaging
