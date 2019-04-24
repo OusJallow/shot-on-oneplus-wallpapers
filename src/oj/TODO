@@ -7,7 +7,7 @@
 
 5. Wrap in an installer
 
-2. Add Metadata to images for future purposes (see TODO 2)
+2. Add Metadata to images for future purposes (see TODO 3)
  using Adobe Commons Imaging
 
 3. Append Image Data (as JSON maybe) to Wallpaper before saving.

@@ -33,7 +33,13 @@ import java.lang.reflect.Method;
 
         catch (Exception ex)
         {
-            System.out.println("Error");
+            String errorMessage = "An unknown error occurred. Please try again.";
+            if(ex.getCause().toString().contains("java.net.UnknownHostException"))
+            {
+                errorMessage = "Downloading Wallpaper Failed. Please check your network connection.";
+            }
+            Controller.errorViewer(errorMessage);
+            classContext.getUiController().clearStatusBar();
             ex.printStackTrace();
         }
         return null;

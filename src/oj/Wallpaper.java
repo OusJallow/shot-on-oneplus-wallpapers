@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.opencv.core.Mat;
 
 import java.lang.reflect.Method;
+import java.net.UnknownHostException;
 
 public class Wallpaper  {
 
@@ -29,12 +30,12 @@ public class Wallpaper  {
     }
 
 
-    public void pullAndSetWallpaperUnthreaded() //thread
+    public void pullAndSetWallpaperUnthreaded() throws Exception //thread
     {
         uiController.setStatusBarMessage("Downloading Wallpaper...");
         WallpaperImage wallpaper = wallpaperPuller.pullWallpaper();
         if(!wallpaper.hasImage())
-            return;
+            throw new RuntimeException("Image not downloaded. No image found.");
         uiController.setStatusBarMessage("Fitting Wallpaper...");
         Mat image = wallpaperFitter.fitWallpaperToScreen(wallpaper.getImage());
         wallpaper.setImage(image);
@@ -57,9 +58,12 @@ public class Wallpaper  {
             taskThread.execute();
 
         }
+
         catch (Exception ex)
         {
             ex.printStackTrace();
+            Controller.errorViewer("An unknown error occurred. Please try again");
+            uiController.clearStatusBar();
         }
     }
 

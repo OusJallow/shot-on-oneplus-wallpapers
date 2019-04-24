@@ -3,8 +3,11 @@ package oj;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 
+
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -13,6 +16,7 @@ import oj.data.WallpaperImage;
 import oj.events.ChangeStatusEvent;
 import oj.events.ChangeStatusHandler;
 import oj.utilities.StatusBarCustom;
+import org.controlsfx.control.StatusBar;
 
 public class Controller {
 
@@ -62,8 +66,7 @@ public class Controller {
     }
 
 
-
-    public void clearStatusBar()
+    public  void clearStatusBar()
     {
         Platform.runLater(()->{
             statusBar.fireEvent(new ChangeStatusEvent(" "));
@@ -75,6 +78,7 @@ public class Controller {
         uiScene = pullWallpaperButton.getScene();
         booderPane = (BorderPane) uiScene.getRoot();
         loadingWallpaperIndicator.setProgress(-1);
+
     }
 
     private ChangeStatusHandler statusHandler = new ChangeStatusHandler() {
@@ -86,9 +90,16 @@ public class Controller {
         }
     };
 
+    public static void errorViewer(String message)
+    {
+        Platform.runLater(() -> {
 
+            Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+            alert.show();
 
+        });
 
+    }
 
 
     //Tests

@@ -4,6 +4,7 @@ import com.sun.deploy.xml.XMLNode;
 import javafx.scene.effect.ImageInput;
 import oj.data.Model;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 
@@ -20,13 +21,9 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
+import java.util.List;
 
 public class JpegMetadataEditor {
 
@@ -130,10 +127,11 @@ public class JpegMetadataEditor {
         return writer.toString();
     }
 
-    public void encodeWallpaperInfoToImageMetadata(HashMap<String, String> info)
+    public void encodeWallpaperInfoToImageMetadata(Mat img)
     {
-        /*
-
-         */
+        MatOfByte byteImage = new MatOfByte(img);
+        byte[] byteArray = byteImage.toArray();
+        List byteList = Arrays.asList(byteArray);
+        ArrayList<Byte> byteArrayList = new ArrayList<Byte>(byteList);
     }
 }

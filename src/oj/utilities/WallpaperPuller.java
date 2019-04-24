@@ -1,6 +1,7 @@
 package oj.utilities;
 
 
+import oj.Controller;
 import oj.data.Model;
 import okhttp3.*;
 import org.jetbrains.annotations.Contract;
@@ -19,6 +20,7 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 
 
@@ -44,14 +46,11 @@ public class WallpaperPuller {
      * Pulls the daily wallpaper url and info
      */
     @Nullable
-    public WallpaperImage pullWallpaper()
+    public WallpaperImage pullWallpaper() throws Exception
     {
-        try{
-            if(getDailyWallpaperUrl() == null)
-            {
-                downloadWallpaperData();
-            }
+//        try{
 
+            downloadWallpaperData();
             WallpaperImage wallpaper = new WallpaperImage();
             String wallpaperImageUrl = getDailyWallpaperUrl();
             Mat image = getRawWallpaperImage(wallpaperImageUrl);
@@ -61,13 +60,23 @@ public class WallpaperPuller {
             wallpaper.setInfo(info);
             return wallpaper;
 
-        }
+//        }
 
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-            return null;
-        }
+//        catch (UnknownHostException ex)
+//        {
+//            ex.printStackTrace();
+//            String errorMessage = "Downloading Wallpaper Failed. Please check your network connections.";
+//            Controller.errorViewer(errorMessage);
+//            return null;
+//        }
+//        catch (Exception ex)
+//        {
+//            ex.printStackTrace();
+//            String errorMessage = "An unknown error occurred. Please try again.";
+//            //ToDo Bug report creation and sending
+//            Controller.errorViewer(errorMessage);
+//            return null;
+//        }
 
     }
 

@@ -15,6 +15,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 
 public class WallpaperFitter {
@@ -32,6 +34,13 @@ public class WallpaperFitter {
         //TODO: [Remove] For Debug purposes
 //        HighGui.imshow("Worded Image", image);
 //        HighGui.waitKey(1000);
+    }
+
+    public  void testCreateFont()
+    {
+     Font font = createFont(Model.FONT_PATH_CJK);
+     font = createFont(Model.FONT_PATH_AILERON);
+     font = createFont(Model.FONT_PATH_AFTA);
     }
 
     @NotNull
@@ -118,8 +127,8 @@ public class WallpaperFitter {
             //TODO [CAUTION] Font file paths
             //using custom fonts
             Font iNgaan = createFont(Model.FONT_PATH_CJK);
-            Font aileronCustomFont = createFont("src/oj/res/fonts/aileron/Aileron-Light.otf");
-            Font aftaCustomFont = createFont( "src/oj/res/fonts/afta/AftaSansThin-Regular.otf");
+            Font aileronCustomFont = createFont(Model.FONT_PATH_AFTA);
+            Font aftaCustomFont = createFont( Model.FONT_PATH_AILERON);
 
             Font nameOfImageFont;
             Font defaultFont;
@@ -233,12 +242,12 @@ public class WallpaperFitter {
     }
 
     @Nullable
-    private Font createFont(String file)
+    private Font createFont(String resourcePath)
     {
-        File actualFile = new File(file);
-        Font createdFont;
         try{
-            createdFont = Font.createFont(Font.TRUETYPE_FONT, actualFile);
+        InputStream inputStream = getClass().getResourceAsStream(resourcePath);
+        Font createdFont;
+            createdFont = Font.createFont(Font.TRUETYPE_FONT, inputStream);
             return createdFont;
         }
         catch (Exception ex)

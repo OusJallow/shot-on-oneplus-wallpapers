@@ -16,13 +16,15 @@ public class LoadOpenCVLibrary {
             if (osName.startsWith("Windows")) {
                 int bitness = Integer.parseInt(System.getProperty("sun.arch.data.model"));
                 if (bitness == 32) {
-                    inputStream = new FileInputStream(
-                            new File("lib\\opencv-native-lib\\x32\\opencv_java400.dll"));
+                    inputStream = LoadOpenCVLibrary.class.getResourceAsStream(
+                            "/oj/lib/opencv-native-lib/x86/opencv_java400.dll");
                 } else if (bitness == 64) {
-                    inputStream = new FileInputStream(
-                            new File("lib\\opencv-native-lib\\x64\\opencv_java400.dll"));
+
+                    inputStream = LoadOpenCVLibrary.class.getResourceAsStream(
+                            "/oj/lib/opencv-native-lib/x64/opencv_java400.dll");;
                 } else {
-                    inputStream = new FileInputStream(new File("lib\\opencv-native-lib\\x64\\opencv_java400.dll"));
+                    inputStream = LoadOpenCVLibrary.class.getResourceAsStream(
+                            "/oj/lib/opencv-native-lib/x86/opencv_java400.dll");;
                 }
                 fileOut = File.createTempFile("lib", ".dll");
             }

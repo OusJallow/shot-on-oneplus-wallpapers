@@ -1,11 +1,14 @@
 package oj.data;
 
+import com.sun.jndi.toolkit.url.Uri;
 import oj.utilities.WallpaperPuller;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 
 import javax.imageio.ImageIO;
+import javax.jws.WebParam;
+
 import javafx.scene.image.Image;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -13,6 +16,8 @@ import org.opencv.imgcodecs.Imgcodecs;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Random;
@@ -29,10 +34,7 @@ public class Model {
 
     public static final String[] CJK_COUNTRIES = {"China", "Japan", "Korea", "South Korea", "North Korea"};
 
-    //Fonts
-    public static final String FONT_PATH_AILERON = "src\\oj\\res\\fonts\\aileron\\Aileron-Light.otf";
-    public static final String FONT_PATH_AFTA = "src\\oj\\res\\fonts\\afta\\AftaSansThin-Regular.otf";
-    public static final String FONT_PATH_CJK = "src\\oj\\res\\fonts\\CJK\\I.Ngaan\\I.Ngaan.ttf";
+
 
     //Setup Working environment paths for application
     private static String APP_WORKSPACE = "ShotOnOnePlus Wallpapers";
@@ -45,9 +47,18 @@ public class Model {
 
 
     //Resource Paths
-    private static String RESOURCE_PATH = "src\\oj\\res";
-    private static String APP_ICON_PATH = RESOURCE_PATH + FILE_SEPARATOR + "icons\\ShotOnOnePlus Logo.png";
-
+    private static String RESOURCE_FILE_SEPARATOR = "/";
+    private static String RESOURCE_PATH = "/oj/res";
+        //Icons
+    private static String APP_ICON_PATH = RESOURCE_PATH
+                + RESOURCE_FILE_SEPARATOR + "icons/ShotOnOnePlus Logo.png";
+         //Fonts
+    public static final String FONT_PATH_AILERON = RESOURCE_PATH
+                 + RESOURCE_FILE_SEPARATOR + "fonts/aileron/Aileron-Light.otf";
+    public static final String FONT_PATH_AFTA =  RESOURCE_PATH
+            + RESOURCE_FILE_SEPARATOR + "fonts/afta/AftaSansThin-Regular.otf";
+    public static final String FONT_PATH_CJK = RESOURCE_PATH
+            + RESOURCE_FILE_SEPARATOR + "fonts/CJK/I.Ngaan/I.Ngaan.ttf";
 
     @Contract(pure = true)
     public static String getPathAppWorkspace() {
@@ -64,7 +75,7 @@ public class Model {
         return PATH_APP_WORKSPACE;
     }
 
-    //TODO: [FAIL, FIX]
+    //TODO: [Deprecated]
     @NotNull
     public static String getRandomString()
     {
@@ -73,11 +84,18 @@ public class Model {
         return new String(randomBytes, Charset.forName("UTF-8"));
     }
 
-    public static Image getApplicationIcon()
+    public Image getApplicationIcon()
     {
-        File file = new File(APP_ICON_PATH);
-        Image image = new Image("file:" + file.getAbsolutePath());
-        return image;
+        try{
+            URL url = Model.class.getResource(APP_ICON_PATH);
+            Image image = new Image(url.toString());
+            return image;
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+            return null;
+        }
     }
 
     //TODO[TEST Methods]

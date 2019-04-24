@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import oj.data.Model;
 import oj.utilities.LoadOpenCVLibrary;
+import oj.utilities.WallpaperFitter;
 
 public class Main extends Application {
 
@@ -15,7 +16,8 @@ public class Main extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("Main View.fxml"));
         primaryStage.setTitle("Shot On OnePlus Wallpapers");
         Scene scene = new Scene(root, 300, 275);
-        primaryStage.getIcons().add(Model.getApplicationIcon());
+
+        primaryStage.getIcons().add(new Model().getApplicationIcon());
         primaryStage.setScene(scene);
         primaryStage.setMinHeight(350);
         primaryStage.setMinWidth(500);
@@ -26,6 +28,7 @@ public class Main extends Application {
         //System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         LoadOpenCVLibrary.loadOpenCV();
         Main.launch(args);
+
     }
 
 }
